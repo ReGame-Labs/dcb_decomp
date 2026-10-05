@@ -1,0 +1,99 @@
+# Digimon Digital Card Battle, Japan (SLPS-02506): SAISEG
+name: saiseg
+sha1: 73c955af3964cb84ce3f30d10af6dd1579f6cf63
+options:
+  basename: saiseg
+  # extracted from disks/jp/P.DRV by tools/extract_drv.py
+  target_path: build/jp/disks/SAISEG.BIN
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/jp/saiseg
+  src_path: src/saiseg
+  build_path: build/jp
+
+  ld_script_path: build/jp/generated/saiseg.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  gp_value: 0x800871D8
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  # the executable's symbols, which the overlay calls and reads
+  symbol_addrs_path:
+    - config/jp/symbols.txt
+    # and its own
+    - config/jp/symbols_saiseg.txt
+  undefined_funcs_auto_path: build/jp/generated/undefined_funcs_auto_saiseg.txt
+  undefined_syms_auto_path: build/jp/generated/undefined_syms_auto_saiseg.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  create_data_pads: False
+  # no C yet: the overlay's code is still splat's assembly
+  create_c_files: False
+
+segments:
+  # loaded at OVERLAY_LOAD_ADDR, the end of the executable's .bss
+  - name: saiseg
+    type: code
+    start: 0x0
+    vram: 0x801EA3E8
+    align: 4
+    subalign: 4
+    subsegments:
+      # us's modules, each with its rodata and data (tools/split_version.py);
+      # jp's own objects where the code shows where they start and end
+      - [0x0, .rodata, sai_data_jp]
+      - [0x4, .rodata, player/sai_player_data_jp]
+      - [0xE0, .rodata, ui/sai_text_jp]
+      - [0x28C, .rodata, ui/sai_labels_jp]
+      - [0x2B8, .rodata, ui/sai_panel_jp]
+      - [0x380, .rodata, area/sai_area_jp]
+      - [0x3F8, .rodata, area/sai_opponent_select_jp]
+      # jp's slot machine and 3D map: each its own object, as both hold the
+      # same Bits format string (GCC merges equal strings within an object) and
+      # their jump tables are 8-aligned from 0x488 and from 0x554
+      - [0x488, .rodata, area/sai_slot_machine]
+      - [0x554, .rodata, map/sai_world_map_jp]
+      # jp's key items and player data screen: one object, as one table of
+      # its states holds all its functions from here to the message window's
+      # the first object has no code, only the number above (as us's sai_data)
+      - [0x5A4, c, sai_data_jp]
+      - [0x5A4, c, player/sai_player_data_jp]
+      # jp's message window and deck screen: one object, as its rodata starts
+      # with the window's glyph color and runs to the deck screen's jump table
+      - [0x1F40, c, ui/sai_text_jp]
+      - [0x3764, c, ui/sai_labels_jp]
+      - [0x4508, c, ui/sai_panel_jp]
+      # jp's area: one object from the map's textures, whose path is the
+      # first of its rodata, as SAI_runArea's jump table is 8-aligned from it
+      - [0x5F38, c, area/sai_area_jp]
+      - [0x6AC0, c, area/sai_opponent_select_jp]
+      # (jp-only: us's SAISEG has no slot machine)
+      - [0x75BC, c, area/sai_slot_machine]
+      # jp's map is walked in 3D: it takes us's world map's place
+      - [0x91E4, c, map/sai_world_map_jp]
+      # the zeroed data's object, which has no code (as us's sai_bss)
+      - [0xB0D8, c, sai_bss_jp]
+      - [0xB0D8, .data, player/sai_player_data_jp]
+      # the data of the modules before the opponent select, which they use
+      # (window definitions whose callbacks are the opponent select's), sits
+      # where only the last of them can have put it
+      - [0xBC18, .data, area/sai_opponent_select_jp]
+      - [0xC094, .data, area/sai_slot_machine]
+      - [0xC7A8, .data, map/sai_world_map_jp]
+      # the data that starts zeroed, all the modules' together
+      - [0xC9C8, .data, sai_bss_jp]
+
+  - [0xD218]

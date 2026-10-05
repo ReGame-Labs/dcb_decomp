@@ -1,0 +1,100 @@
+name: build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  # Every version names its symbols as us does (tools/check_names.py), and
+  # the README's count of fake matches and hacks is the source's
+  # (tools/hacks.py). They only read config/, src/ and include/, so they need
+  # no disc and run for forks too.
+  names:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        persist-credentials: false
+
+    - run: python3 tools/check_names.py
+
+    - run: python3 tools/hacks.py --check README.md
+
+  build:
+    # The original executable lives in a private repository that only this
+    # repository's own runs can read, so builds from forks are skipped.
+    if: >-
+      github.repository == 'ReGame-Labs/dcb_decomp' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # deps: where the version's executable and P.DRV are in the
+        # dependencies repository. report: upload build/<version>/report.json
+        # as <exe>_report, the artifact decomp.dev reads.
+        include:
+          - version: us
+            exe: SLUS_013.28
+            deps: .
+            report: true
+          - version: jp
+            exe: SLPS_025.06
+            deps: jp
+            report: true
+          - version: eu
+            exe: SLES_039.00
+            deps: eu
+            report: true
+    name: build (${{ matrix.version }})
+    env:
+      VERSION: ${{ matrix.version }}
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        submodules: recursive
+        persist-credentials: false
+
+    - uses: actions/checkout@v5
+      with:
+        repository: ReGame-Labs/dcb_decomp_dependencies
+        ssh-key: ${{ secrets.DCB_DEPENDENCIES_SSH_KEY }}
+        path: dependencies
+        persist-credentials: false
+
+    - run: |
+        mkdir -p "disks/$VERSION"
+        cp "dependencies/$DEPS/$EXE" "dependencies/$DEPS/P.DRV" "disks/$VERSION/"
+        rm -rf dependencies
+      env:
+        DEPS: ${{ matrix.deps }}
+        EXE: ${{ matrix.exe }}
+
+    - run: |
+        sudo apt-get update
+        sudo apt-get install -y binutils-mipsel-linux-gnu gcc-mipsel-linux-gnu
+
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+        cache: pip
+
+    - run: pip install -r requirements.txt
+
+    - run: tools/dl_deps.sh
+
+    # make and the tools take VERSION from the environment
+    - run: |
+        make generate
+        make -j$(nproc)
+        make compare
+
+    - run: make report
+
+    - if: matrix.report
+      uses: actions/upload-artifact@v6
+      with:
+        name: ${{ matrix.exe }}_report
+        path: build/${{ matrix.version }}/report.json

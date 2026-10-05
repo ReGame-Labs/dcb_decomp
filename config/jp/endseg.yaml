@@ -1,0 +1,69 @@
+# Digimon Digital Card Battle, Japan (SLPS-02506): ENDSEG
+name: endseg
+sha1: c76651f1292c770d53d2fac13a6fabb65a8622ff
+options:
+  basename: endseg
+  # extracted from disks/jp/P.DRV by tools/extract_drv.py
+  target_path: build/jp/disks/ENDSEG.BIN
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/jp/endseg
+  src_path: src/endseg
+  build_path: build/jp
+
+  ld_script_path: build/jp/generated/endseg.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  gp_value: 0x800871D8
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  # the executable's symbols, which the overlay calls and reads
+  symbol_addrs_path:
+    - config/jp/symbols.txt
+    # and its own
+    - config/jp/symbols_endseg.txt
+  undefined_funcs_auto_path: build/jp/generated/undefined_funcs_auto_endseg.txt
+  undefined_syms_auto_path: build/jp/generated/undefined_syms_auto_endseg.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  create_data_pads: False
+  # no C yet: the overlay's code is still splat's assembly
+  create_c_files: False
+
+segments:
+  # loaded at OVERLAY_LOAD_ADDR, the end of the executable's .bss
+  - name: endseg
+    type: code
+    start: 0x0
+    vram: 0x801EA3E8
+    align: 4
+    subalign: 4
+    subsegments:
+      # jp's records screen (endseg.c is us's and eu's)
+      - [0x0, .rodata, endseg_jp]
+      # jp links OPENSEG's movie player into ENDSEG
+      - [0x518, .rodata, title/open_movie]
+      - [0x52C, c, endseg_jp]
+      - [0x2784, c, title/open_movie]
+      # the zeroed data's object, which has no code
+      - [0x3534, c, end_bss_jp]
+      - [0x3534, .data, endseg_jp]
+      - [0x35DC, .data, title/open_movie]
+      # the data ENDSEG starts with zeroed: the records', then the movie
+      # player's
+      - [0x361C, .data, end_bss_jp]
+
+  - [0x3714]

@@ -1,0 +1,93 @@
+# Digimon Digital Card Battle, Japan (SLPS-02506): SUGSEG
+name: sugseg
+sha1: 8abbf8cbbb530e5afdfa7024456d1b17a9b4186a
+options:
+  basename: sugseg
+  # extracted from disks/jp/P.DRV by tools/extract_drv.py
+  target_path: build/jp/disks/SUGSEG.BIN
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/jp/sugseg
+  src_path: src/sugseg
+  build_path: build/jp
+
+  ld_script_path: build/jp/generated/sugseg.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  gp_value: 0x800871D8
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  # the executable's symbols, which the overlay calls and reads
+  symbol_addrs_path:
+    - config/jp/symbols.txt
+    # and its own
+    - config/jp/symbols_sugseg.txt
+  undefined_funcs_auto_path: build/jp/generated/undefined_funcs_auto_sugseg.txt
+  undefined_syms_auto_path: build/jp/generated/undefined_syms_auto_sugseg.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  create_data_pads: False
+  # no C yet: the overlay's code is still splat's assembly
+  create_c_files: False
+
+segments:
+  # loaded at OVERLAY_LOAD_ADDR, the end of the executable's .bss
+  - name: sugseg
+    type: code
+    start: 0x0
+    vram: 0x801EA3E8
+    align: 4
+    subalign: 4
+    subsegments:
+      # us's modules, each with its rodata and data (tools/split_version.py)
+      - [0x0, .rodata, effect/sug_history]
+      # jp's SUGSEG holds the effect objects and rings that us has in the
+      # executable (main/model/effect_object, effect_prims)
+      - [0x4, .rodata, model/effect_object]
+      - [0x3E8, .rodata, effect/sug_gradient]
+      - [0x400, .rodata, effect/sug_tex_anim]
+      - [0x448, .rodata, effect/sug_effect_script]
+      - [0x4E8, .rodata, battle/sug_sprite]
+      - [0x50C, .rodata, battle/sug_battle]
+      - [0x514, c, effect/sug_history]
+      - [0xB44, c, model/effect_object]
+      - [0x25A8, c, model/effect_prims]
+      - [0x381C, c, effect/sug_sphere]
+      - [0x71E0, c, effect/sug_gradient]
+      - [0x866C, c, effect/sug_model_effect_jp]
+      - [0x8CE8, c, effect/sug_sprite_effect]
+      - [0x8E98, c, effect/sug_trail]
+      - [0xA250, c, effect/sug_fade_rect]
+      - [0xA50C, c, effect/sug_scroll_texture]
+      - [0xAB9C, c, effect/sug_tex_anim]
+      # more of us's main/model/effect_prims: the streak particles
+      - [0xB69C, c, model/streak_particles]
+      - [0xC328, c, effect/sug_light_motion]
+      - [0xC890, c, effect/sug_effect_script]
+      - [0xE9AC, c, battle/sug_sprite]
+      - [0xF400, c, battle/sug_camera]
+      - [0xF548, c, battle/sug_hud]
+      - [0x110FC, c, battle/sug_battle]
+      # the zeroed data's object, which has no code (as us's sug_bss)
+      - [0x124D8, c, sug_bss_jp]
+      - [0x124D8, .data, effect/sug_light_motion]
+      - [0x12518, .data, effect/sug_effect_script]
+      # data us keeps in sug_bss, in another order: jp has no screen copy
+      # effect, so neither sug_battle's SUG_SCREEN_FX_PHASE nor
+      # sug_screen_copy's data, and the effect root follows SUG_TAM_CACHE
+      - [0x125F0, .data, sug_bss_jp]
+
+  - [0x1281C]

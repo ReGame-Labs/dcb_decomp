@@ -1,0 +1,86 @@
+# Digimon Digital Card Battle, Europe (SLES-03900): OPENSEG
+name: openseg
+sha1: 407a2441bd4e1b3f6ed36c0b237660f65ac6cb63
+options:
+  basename: openseg
+  # extracted from disks/eu/P.DRV by tools/extract_drv.py
+  target_path: build/eu/disks/OPENSEG.BIN
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/eu/openseg
+  src_path: src/openseg
+  build_path: build/eu
+
+  ld_script_path: build/eu/generated/openseg.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  gp_value: 0x8007A224
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  # the executable's symbols, which the overlay calls and reads
+  symbol_addrs_path:
+    - config/eu/symbols.txt
+    # and its own
+    - config/eu/symbols_openseg.txt
+  undefined_funcs_auto_path: build/eu/generated/undefined_funcs_auto_openseg.txt
+  undefined_syms_auto_path: build/eu/generated/undefined_syms_auto_openseg.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  migrate_rodata_to_functions: True
+  create_data_pads: False
+  # the C files in src/openseg/ exist; mk/version/eu.mk lists those eu builds
+  create_c_files: False
+
+segments:
+  # loaded at OVERLAY_LOAD_ADDR, the end of the executable's .bss
+  - name: openseg
+    type: code
+    start: 0x0
+    vram: 0x801E0890
+    align: 4
+    subalign: 4
+    subsegments:
+      # us's modules, each with its rodata and data (tools/split_version.py)
+      - [0x0, .rodata, title/open_movie]
+      - [0x18, .rodata, friend/open_trade]
+      - [0x24C, .rodata, registration/open_registration]
+      - [0xAFC, .rodata, registration/open_name_entry]
+      - [0xBA4, .rodata, registration/open_starter]
+      - [0xC14, .rodata, title/open_title]
+      - [0xC70, .rodata, friend/open_friend]
+      - [0xDF4, .rodata, memcard/open_memcard]
+      - [0x1A00, .rodata, memcard/open_save]
+      - [0x1AE8, c, title/open_movie]
+      - [0x2984, c, friend/open_trade]
+      - [0x6BF8, c, registration/open_registration]
+      - [0x8D8C, c, registration/open_name_entry]
+      - [0xA014, c, registration/open_starter]
+      - [0xAFD4, c, title/open_title]
+      - [0xC510, c, friend/open_friend]
+      - [0xD764, c, memcard/open_memcard]
+      - [0x1046C, c, memcard/open_save]
+      - [0x1197C, c, open_bss]
+      - [0x1197C, .data, title/open_movie]
+      - [0x119A4, .data, friend/open_trade]
+      - [0x11AAC, .data, registration/open_registration]
+      - [0x11ED8, .data, registration/open_name_entry]
+      - [0x11F34, .data, registration/open_starter]
+      - [0x11F74, .data, title/open_title]
+      - [0x11F80, .data, memcard/open_memcard]
+      - [0x12270, .data, memcard/open_save]
+      - [0x12280, .data, open_bss]
+
+  - [0x19C00]

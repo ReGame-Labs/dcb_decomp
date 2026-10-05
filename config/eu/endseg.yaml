@@ -1,0 +1,61 @@
+# Digimon Digital Card Battle, Europe (SLES-03900): ENDSEG
+name: endseg
+sha1: 356e7b24dc207266fadcff74a485dce021f8d6bc
+options:
+  basename: endseg
+  # extracted from disks/eu/P.DRV by tools/extract_drv.py
+  target_path: build/eu/disks/ENDSEG.BIN
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/eu/endseg
+  src_path: src/endseg
+  build_path: build/eu
+
+  ld_script_path: build/eu/generated/endseg.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  gp_value: 0x8007A224
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  # the executable's symbols, which the overlay calls and reads
+  symbol_addrs_path:
+    - config/eu/symbols.txt
+    # and its own
+    - config/eu/symbols_endseg.txt
+  undefined_funcs_auto_path: build/eu/generated/undefined_funcs_auto_endseg.txt
+  undefined_syms_auto_path: build/eu/generated/undefined_syms_auto_endseg.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  migrate_rodata_to_functions: True
+  create_data_pads: False
+  # the C files in src/endseg/ exist; mk/version/eu.mk lists those eu builds
+  create_c_files: False
+
+segments:
+  # loaded at OVERLAY_LOAD_ADDR, the end of the executable's .bss
+  - name: endseg
+    type: code
+    start: 0x0
+    vram: 0x801E0890
+    align: 4
+    subalign: 4
+    subsegments:
+      # us's modules, each with its rodata and data (tools/split_version.py)
+      - [0x0, .rodata, endseg]
+      - [0x8D4, c, endseg]
+      - [0x2B8C, .data, endseg]
+
+  - [0x2D74]

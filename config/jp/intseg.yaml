@@ -1,0 +1,61 @@
+# Digimon Digital Card Battle, Japan (SLPS-02506): INTSEG
+name: intseg
+sha1: 9faf474bd3876f5278bdd416a01fedffc9238307
+options:
+  basename: intseg
+  # extracted from disks/jp/P.DRV by tools/extract_drv.py
+  target_path: build/jp/disks/INTSEG.BIN
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/jp/intseg
+  src_path: src/intseg
+  build_path: build/jp
+
+  ld_script_path: build/jp/generated/intseg.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  gp_value: 0x800871D8
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  # the executable's symbols, which the overlay calls and reads
+  symbol_addrs_path:
+    - config/jp/symbols.txt
+    # and its own
+    - config/jp/symbols_intseg.txt
+  undefined_funcs_auto_path: build/jp/generated/undefined_funcs_auto_intseg.txt
+  undefined_syms_auto_path: build/jp/generated/undefined_syms_auto_intseg.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  create_data_pads: False
+  # the C files in src/intseg/ exist
+  create_c_files: False
+
+segments:
+  # loaded at OVERLAY_LOAD_ADDR, the end of the executable's .bss
+  - name: intseg
+    type: code
+    start: 0x0
+    vram: 0x801EA3E8
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, .rodata, intseg]
+      - [0xF74, c, intseg]
+      - [0x7168, c, int_bss]
+      - [0x7168, .data, intseg]
+      - [0x75D4, .data, int_bss]
+
+  - [0x774C]

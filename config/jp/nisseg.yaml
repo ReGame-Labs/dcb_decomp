@@ -1,0 +1,85 @@
+# Digimon Digital Card Battle, Japan (SLPS-02506): NISSEG
+name: nisseg
+sha1: ae81c2a0271c75a6b1c34ee12cbdb9c49131b0c9
+options:
+  basename: nisseg
+  # extracted from disks/jp/P.DRV by tools/extract_drv.py
+  target_path: build/jp/disks/NISSEG.BIN
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/jp/nisseg
+  src_path: src/nisseg
+  build_path: build/jp
+
+  ld_script_path: build/jp/generated/nisseg.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  gp_value: 0x800871D8
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  # the executable's symbols, which the overlay calls and reads
+  symbol_addrs_path:
+    - config/jp/symbols.txt
+    # and its own
+    - config/jp/symbols_nisseg.txt
+  undefined_funcs_auto_path: build/jp/generated/undefined_funcs_auto_nisseg.txt
+  undefined_syms_auto_path: build/jp/generated/undefined_syms_auto_nisseg.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  create_data_pads: False
+  # no C yet: the overlay's code is still splat's assembly
+  create_c_files: False
+
+segments:
+  # loaded at OVERLAY_LOAD_ADDR, the end of the executable's .bss
+  - name: nisseg
+    type: code
+    start: 0x0
+    vram: 0x801EA3E8
+    align: 4
+    subalign: 4
+    subsegments:
+      # the modules, each with its rodata and data; the .data of the deck
+      # screens' windows, tables and kana sits apart from its code
+      - [0x0, .rodata, title/nis_title]
+      - [0x34, .rodata, trade/nis_trade]
+      - [0x270, .rodata, vs/nis_vs_deck_select]
+      - [0x310, .rodata, vs/nis_vs_mode]
+      - [0x48C, .rodata, deck/nis_auto_deck]
+      - [0x4CC, .rodata, deck/nis_deck_windows]
+      - [0xC24, .rodata, deck/nis_deck_scene]
+      - [0xC2C, .rodata, deck/nis_deck_editor]
+      - [0xC58, .rodata, viewer/nis_model_viewer]
+      - [0xCB4, c, title/nis_title]
+      - [0x1434, c, trade/nis_trade]
+      - [0x5A80, c, vs/nis_vs_deck_select]
+      - [0x63C4, c, vs/nis_vs_mode]
+      - [0x6E30, c, deck/nis_auto_deck]
+      - [0x980C, c, deck/nis_deck_windows]
+      - [0xD080, c, deck/nis_deck_scene]
+      - [0xD440, c, deck/nis_deck_editor]
+      - [0x10EBC, c, viewer/nis_model_viewer]
+      # the zeroed data's object, which has no code
+      - [0x11984, c, nis_bss]
+      - [0x11984, .data, title/nis_title]
+      - [0x11988, .data, trade/nis_trade]
+      - [0x11A7C, .data, deck/nis_deck_editor]
+      - [0x11C3C, .data, deck/nis_auto_deck]
+      - [0x11C6C, .data, deck/nis_deck_windows]
+      - [0x1207C, .data, viewer/nis_model_viewer]
+      - [0x120C0, .data, nis_bss]
+
+  - [0x125DC]

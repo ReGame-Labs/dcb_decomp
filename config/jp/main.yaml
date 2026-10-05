@@ -1,0 +1,230 @@
+# Digimon Digital Card Battle, Japan (SLPS-02506): the executable
+name: main
+sha1: 447c5256757685728bfbecaf3b3b2e7c0164b6cc
+options:
+  basename: main
+  target_path: disks/jp/SLPS_025.06
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/jp/main
+  asset_path: asm/jp/main/bin
+  src_path: src/main
+  build_path: build/jp
+
+  ld_script_path: build/jp/generated/main.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  # the startup code (__SN_ENTRY_POINT) sets $gp to the start of .bss
+  gp_value: 0x800871D8
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  symbol_addrs_path:
+    - config/jp/symbols.txt
+    - config/jp/symbols_overlay_calls.txt
+  undefined_funcs_auto_path: build/jp/generated/undefined_funcs_auto_main.txt
+  undefined_syms_auto_path: build/jp/generated/undefined_syms_auto_main.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  create_data_pads: False
+  # no C yet: the game's code is still splat's assembly
+  create_c_files: False
+
+segments:
+  - name: header
+    type: header
+    start: 0x0
+
+  - name: main
+    type: code
+    start: 0x800
+    vram: 0x80010000
+    # the startup code clears .bss up to 0x801EA3E8, OVERLAY_LOAD_ADDR
+    bss_size: 0x163210
+    align: 4
+    subalign: 4
+    subsegments:
+      # us's modules, each with its rodata and data (tools/split_version.py)
+      - [0x800, .rodata, system/render_loop]
+      - [0x808, .rodata, system/boot]
+      - [0x818, .rodata, system/cd_file]
+      - [0x820, .rodata, ui/window_jp]
+      - [0x820, .rodata, system/pad]
+      - [0x83C, .rodata, gfx/prim_util]
+      - [0x850, .rodata, script/script]
+      - [0x8B0, .rodata, model/anim_control]
+      - [0x8DC, .rodata, model/model_load]
+      - [0x900, .rodata, model/scene3d]
+      - [0x984, .rodata, model/camera]
+      - [0x9B4, .rodata, ui/text_jp]
+      - [0x9D8, .rodata, ui/str_util]
+      - [0xA0C, .rodata, system/sound]
+      - [0xA2C, .rodata, system/opening_movie]
+      # player_rank's rodata starts with the rank names, which us has in
+      # memcard.c (its first jump table is 8-aligned from them)
+      - [0xA4C, .rodata, card/player_rank]
+      # jp's player_data starts right after updatePlayerRanks
+      - [0xC50, .rodata, card/player_data_jp]
+      - [0xD8C, .rodata, model/stage]
+      - [0xDD4, .rodata, gfx/prim_desc]
+      # OVERLAY_LOAD_ADDR (us has it in duel_util), then duel's strings
+      - [0xDF8, .rodata, duel/duel_jp]
+      - [0xF34, .rodata, duel/tutorial_jp]
+      - [0x1008, .rodata, duel/cpu_decision]
+      # duel_util has no rodata: card_motion's (with battle_hud's
+      # drawHudPanelContents) comes next
+      - [0x1028, .rodata, duel/card_motion_jp]
+      - [0x11CC, .rodata, duel/hud_panels_jp]
+      - [0x1340, .rodata, duel/duel_session_jp]
+      # the rodata of the asm modules after duel_session, up to duel_launch
+      - [0x15A4, .rodata, card/card_render_jp]
+      - [0x172C, .rodata, card/card_db_jp]
+      - [0x1738, .rodata, duel/duel_launch_jp]
+      - [0x1768, .rodata, card/card_vram]
+      - [0x17B4, .rodata, card/partner_level_jp]
+      - [0x1864, .rodata, system/memcard]
+      - [0x1884, .rodata, system/memcard_screen]
+      - [0x2740, .rodata, system/game_exit]
+      # PsyQ's rodata, from libspu's on (jp's executable has no hacking_shell)
+      - [0x2768, rodata, psyq]
+      - [0x3628, c, main]
+      - [0x36D0, c, system/task]
+      - [0x414C, asm, startup]
+      - [0x44CC, c, system/vblank]
+      - [0x4548, c, gfx/screen_copy]
+      - [0x487C, c, system/render_loop]
+      - [0x4B8C, c, system/boot]
+      - [0x4D60, c, system/cd_file]
+      - [0x5DE4, c, system/frame_callback]
+      - [0x5F00, c, ui/window_jp]
+      - [0x7CF8, c, system/pad]
+      - [0x8080, c, system/heap]
+      - [0x8628, c, system/angle]
+      - [0x86C4, c, system/loader]
+      - [0x898C, c, gfx/vram_upload]
+      - [0x8E80, c, gfx/display]
+      - [0x90C4, c, system/archive]
+      - [0x91B8, c, gfx/prim]
+      - [0x9654, c, gfx/prim_pair]
+      - [0xA628, c, gfx/prim3d]
+      - [0xB218, c, gfx/prim_util]
+      - [0xBB7C, c, gfx/transform]
+      - [0xBEC8, c, gfx/fade]
+      - [0xC130, c, gfx/tmd_sort]
+      - [0xDAF0, c, script/script]
+      - [0xE638, c, model/model_anim]
+      - [0xFBF0, c, model/anim_control]
+      - [0x10380, c, model/model_load]
+      - [0x10C58, c, model/scene3d]
+      - [0x1146C, c, model/wire_grid]
+      - [0x11C28, c, model/camera]
+      - [0x12778, asm, libmath]
+      - [0x13DCC, c, ui/text_jp]
+      - [0x17C80, c, ui/str_util]
+      - [0x188D0, c, system/sound]
+      - [0x18EF0, c, system/opening_movie]
+      - [0x18F9C, c, system/sound_play]
+      - [0x195D8, c, card/player_rank]
+      # jp's player_data is one object up to stage: two functions of jp's own
+      # before initPlayerData, the overlay launchers us moved to game_flow and
+      # duel_launch (they share its strings), jp's menu window helpers, its
+      # scrolling background (A:\ADVBG.PAK, where us has scroll_bg) and, last,
+      # findDigimonCardByModelId, loadSkill and loadSkillFromDisc, as in us.
+      # jp has no decompress module (nor its LZ/Huffman code anywhere).
+      - [0x19E58, c, card/player_data_jp]
+      - [0x1D860, c, model/stage]
+      # jp's own: prim descriptors drawn into the frame's 17th prim slot (the
+      # overlays use them), number digits, a callback table
+      - [0x1E370, c, gfx/prim_desc]
+      - [0x1F338, c, duel/duel_jp]
+      # jp's own: the tutorial duel's turn loop, with the two helpers only it
+      # calls (us runs the tutorial inside runDuelTurnLoop)
+      - [0x22DE8, c, duel/tutorial_jp]
+      - [0x26D60, c, duel/cpu_decision]
+      # with a function of jp's own before duel_util's
+      - [0x26F5C, c, duel/duel_util_jp]
+      # card_motion_jp starts with jp's drawHudPanelContents (battle_hud's in
+      # us)
+      - [0x2751C, c, duel/card_motion_jp]
+      # jp's hud_panels holds the eleven panels' functions and the shared one's
+      - [0x2CA44, c, duel/hud_panels_jp]
+      - [0x2F79C, c, duel/duel_session_jp]
+      - [0x30D10, c, duel/duel_setup_jp]
+      - [0x31114, c, duel/card_zones]
+      # jp's card_render: its HUD panels (KAWSEG's in us) and the duel's HUD
+      # drawing
+      - [0x31F5C, c, card/card_render_jp]
+      # jp's card_db: loading the card files and the collection
+      - [0x337CC, c, card/card_db_jp]
+      # jp's own: the card polys, the card sprite renderer (card_render's in
+      # us) and the hand cursor (KAWSEG's in us)
+      - [0x34200, c, card/card_sprite_jp]
+      # jp's own: the duel's battle log
+      - [0x35874, c, duel/battle_log_jp]
+      # jp's startCpuDuel and startVersusDuel (jp has no game_flow object: its
+      # launchers are in player_data and here)
+      - [0x35A4C, c, duel/duel_launch_jp]
+      # card_render's first three functions, in an object of their own
+      - [0x35CD8, c, card/card_vram]
+      # jp's option screen and the end of a versus duel
+      - [0x365B4, c, card/partner_level_jp]
+      # jp's memcard object holds only the memory card functions, and all of
+      # them (from formatMemoryCard on, they were hacking_shell's range)
+      - [0x36F24, c, system/memcard]
+      - [0x37DB4, c, system/save_checksum]
+      # jp's own memory card screen (us has it in OPENSEG): one object, its
+      # rodata and data one block each. The pairing put us's dialog and
+      # battle_hud here, but none of these functions is theirs
+      - [0x37E50, c, system/memcard_screen]
+      - [0x3C2B8, c, system/game_exit]
+      - [0x3C66C, asm, psyq]
+      - [0x5BF7C, .data, main]
+      - [0x5BF84, .data, system/vblank]
+      - [0x5BF88, .data, system/cd_file]
+      - [0x5BFA8, .data, ui/window_jp]
+      - [0x5BFB0, .data, system/loader]
+      - [0x5BFB4, .data, gfx/prim_util]
+      - [0x5C020, .data, gfx/tmd_sort]
+      - [0x5C040, .data, model/wire_grid]
+      - [0x5C054, .data, ui/text_jp]
+      # jp's font, which str_util's getSjisGlyph reads: the 12x11 glyphs of
+      # the symbols, kana and alphabets, then of the 2965 kanji of JIS level
+      # 1 (0x889F-0x9872), 22 bytes each, and the runs of codes that index
+      # them. The C builds the glyphs from the PNG sheets tools/font.py cuts
+      # out of the executable (config/jp/fonts.txt).
+      - [0x5C0FC, .data, ui/str_util]
+      - [0x6EDA0, .data, system/sound]
+      # player_rank's PLAYER_PROFILES to COMPLETE_SET_CARD_COUNTS (us has them
+      # in memcard)
+      - [0x6EDF4, .data, card/player_rank]
+      # the tables of jp's own code in player_data
+      - [0x6EE64, .data, card/player_data_jp]
+      - [0x6F094, .data, model/stage]
+      - [0x6F114, .data, gfx/prim_desc]
+      - [0x6F144, .data, duel/card_motion_jp]
+      - [0x6F148, .data, duel/hud_panels_jp]
+      - [0x6F14C, .data, duel/duel_session_jp]
+      - [0x6F1B4, .data, card/card_render_jp]
+      # partner_level_jp's OPTION_EXIT_TASKS
+      - [0x6F574, .data, card/partner_level_jp]
+      - [0x6F57C, .data, system/memcard_screen]
+      - [0x6F744, data, psyq]
+      # the game's code, from main() on: one asm range for now
+      - { start: 0x779D8, type: bss, vram: 0x800871D8, name: game }
+      # PsyQ's .bss starts with libspu's; the game's common symbols that come
+      # after it stay there, as in us
+      - { start: 0x779D8, type: bss, vram: 0x801E4B60, name: psyq }
+
+  - [0x78000]

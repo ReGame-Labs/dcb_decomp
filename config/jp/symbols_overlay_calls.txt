@@ -1,0 +1,90 @@
+// Overlay functions and data the executable uses by address, under the
+// overlay's own names, as in config/us/symbols_overlay_calls.txt. Only
+// config/jp/main.yaml reads this file: the overlays' configs keep their own
+// names for these addresses, and another overlay may be loaded there.
+
+// names from the C of the modules this version builds (tools/version_symbols.py)
+SUG_runPolygonBattle = 0x801FC578; // type:func
+tickEffectMotion = 0x801EBFA4; // type:func
+OPEN_findMovieFile = 0x801ECD00; // type:func
+OPEN_playMovie = 0x801ED718; // type:func
+END_runPlayerRecords = 0x801EB4FC; // type:func
+KAW_countHandDigivolves = 0x801ED644; // type:func
+KAW_simulateBattles = 0x801EE36C; // type:func
+KAW_planDigivolves = 0x801EEB8C; // type:func
+KAW_decideRedraw = 0x801EEF9C; // type:func
+KAW_chooseDigimonToPlace = 0x801EF5C8; // type:func
+KAW_chooseDpCard = 0x801F0AA0; // type:func
+KAW_selectDigivolvePlan = 0x801F0F80; // type:func
+KAW_chooseDigivolveTarget = 0x801F1088; // type:func
+KAW_planDigivolveOptions = 0x801F179C; // type:func
+KAW_chooseDigivolveOption = 0x801F2310; // type:func
+KAW_chooseAttack = 0x801F2358; // type:func
+KAW_chooseSupportCard = 0x801F2C6C; // type:func
+NIS_runTitleScreen = 0x801EB2CC; // type:func version-only (NISSEG's title screen, which the executable starts)
+KAW_runResultScreen = 0x801FBFEC; // type:func
+KAW_runTurnOrderChoice = 0x801FA4E0; // type:func version-only
+KAW_runVersusIntro = 0x801FAD28; // type:func
+KAW_RESULT_SCREEN_STATE = 0x801FFEB4;
+
+// the overlay functions jp's player_data starts, by their names in their
+// overlays (SUBSEG, SAISEG, NISSEG)
+SUB_runShop = 0x801F1B5C; // type:func version-only
+SUB_openSellShop = 0x801F2EF4; // type:func version-only
+SUB_openBuyShop = 0x801F2FFC; // type:func version-only
+SAI_runWorldMap = 0x801F35CC; // type:func
+NIS_enterDeckName = 0x801F8230; // type:func version-only
+NIS_enterDeckList = 0x801FB1BC; // type:func version-only
+
+// the KAWSEG functions jp's turn loops call (duel_jp), and where the
+// overlays load
+KAW_resolveBattle = 0x801F3F24; // type:func
+KAW_checkDigivolveTarget = 0x801F7CEC; // type:func
+KAW_checkAnyDigivolve = 0x801F80A4; // type:func
+KAW_setStatPenalty = 0x801F8214; // type:func
+KAW_pickCardArtSlot = 0x801F829C; // type:func
+KAW_tickCardCursor = 0x801F87FC; // type:func
+KAW_openCardSelect = 0x801F8E24; // type:func
+KAW_closeCardSelect = 0x801F8E6C; // type:func
+KAW_drawCardToHand = 0x801F9328; // type:func
+KAW_discardCard = 0x801F93C0; // type:func
+KAW_placeDigimonFromHand = 0x801F94F8; // type:func
+KAW_returnDigimonToHand = 0x801F9584; // type:func
+KAW_returnPlayedCard = 0x801F9618; // type:func
+KAW_returnDpCardToHand = 0x801F9768; // type:func
+KAW_playOnlineDeckTop = 0x801F97FC; // type:func
+KAW_playCardFromHand = 0x801F9878; // type:func
+KAW_chargeDpCard = 0x801F9904; // type:func
+KAW_redrawHand = 0x801F9990; // type:func
+KAW_undoDigivolve = 0x801F9A90; // type:func
+KAW_discardDpSlots = 0x801F9B3C; // type:func
+KAW_checkKnockout = 0x801F9C20; // type:func
+OVERLAY_AREA = 0x801EA3E8;
+KAW_drawHandHints = 0x801F8488; // type:func
+KAW_tickHelp = 0x801F8F68; // type:func version-only
+KAW_tickGiveUpPrompt = 0x801F9144; // type:func version-only
+KAW_runCardPrize = 0x801FDFC4; // type:func version-only
+KAW_openTutorialMessage = 0x801FF2C0; // type:func version-only
+KAW_startTutorial = 0x801FEC84; // type:func
+KAW_freeTutorial = 0x801FF0B8; // type:func
+SAI_doNothing = 0x801ECC58; // type:func version-only
+SAI_returnToArea = 0x801F0EA8; // type:func version-only
+
+// the overlay tasks jp's memory card screen goes on to (memcard_screen.c):
+// (NISSEG's: SAISEG has no function at 0x801F117C)
+NIS_runMainMenuTask = 0x801F117C; // type:func version-only
+NIS_runVsMode = 0x801F0820; // type:func version-only
+NIS_enterDeckListFromMenu = 0x801FB26C; // type:func version-only
+INT_introTask = 0x801EB428; // type:func version-only
+
+// the NISSEG tasks of the menus in jp's player_data (MENU_HEADERS, MENU_ITEMS)
+NIS_runMenuE7D8 = 0x801F112C; // type:func version-only
+NIS_runMenuE7E4 = 0x801F10DC; // type:func version-only
+NIS_returnToDeckList = 0x801FB1DC; // type:func version-only
+NIS_openDeckMenu = 0x801FAB84; // type:func version-only
+NIS_runDeckKinds = 0x801FA5E0; // type:func version-only
+NIS_runCardGrid = 0x801F9F48; // type:func version-only
+NIS_enterDeckListFromVs = 0x801FB1FC; // type:func version-only
+NIS_enterDeckListForTrade = 0x801FB234; // type:func version-only
+NIS_startVsDeckSelect = 0x801F01F4; // type:func version-only
+NIS_startTrade = 0x801EB890; // type:func version-only

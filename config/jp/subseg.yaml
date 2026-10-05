@@ -1,0 +1,69 @@
+# Digimon Digital Card Battle, Japan (SLPS-02506): SUBSEG
+name: subseg
+sha1: fd0b1301bc5761c8e710d26c6e7bff9db86fe2d1
+options:
+  basename: subseg
+  # extracted from disks/jp/P.DRV by tools/extract_drv.py
+  target_path: build/jp/disks/SUBSEG.BIN
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/jp/subseg
+  src_path: src/subseg
+  build_path: build/jp
+
+  ld_script_path: build/jp/generated/subseg.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  gp_value: 0x800871D8
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  # the executable's symbols, which the overlay calls and reads
+  symbol_addrs_path:
+    - config/jp/symbols.txt
+    # and its own
+    - config/jp/symbols_subseg.txt
+  undefined_funcs_auto_path: build/jp/generated/undefined_funcs_auto_subseg.txt
+  undefined_syms_auto_path: build/jp/generated/undefined_syms_auto_subseg.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  create_data_pads: False
+  # no C yet: the overlay's code is still splat's assembly
+  create_c_files: False
+
+segments:
+  # loaded at OVERLAY_LOAD_ADDR, the end of the executable's .bss
+  - name: subseg
+    type: code
+    start: 0x0
+    vram: 0x801EA3E8
+    align: 4
+    subalign: 4
+    subsegments:
+      # jp's SUBSEG is a card shop, two objects and the zeroed data: the
+      # first holds the overlay's number and the shop's .rodata starts 4
+      # bytes in, where its jump tables' 8-byte alignment puts the start of
+      # an object; the strings of the shop's data tables sit between those
+      # of its functions, so its data is its own. Nothing shows a further
+      # object boundary. The first is named after us's unit (us's first
+      # module holds its overlay number too); the shop is jp's own module.
+      - [0x0, .rodata, deck/sub_name_entry_jp]
+      - [0x4, .rodata, shop/sub_shop]
+      - [0x520, c, deck/sub_name_entry_jp]
+      - [0x530, c, shop/sub_shop]
+      - [0x8EE8, .data, shop/sub_shop]
+      - [0x9120, .data, sub_bss_jp]
+
+  - [0x93A0]

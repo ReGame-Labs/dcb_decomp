@@ -1,0 +1,190 @@
+name: main
+sha1: fa4e03b5e0671dce399a35f2747080ced492d2c3
+options:
+  basename: main
+  target_path: disks/us/SLUS_013.28
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/us/main
+  src_path: src/main
+  build_path: build/us
+
+  ld_script_path: build/us/generated/main.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  find_file_boundaries: True
+  gp_value: 0x80077A08
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  symbol_addrs_path:
+    - config/us/symbols.txt
+    # the overlay functions the executable calls, under their overlay's names
+    - config/us/symbols_overlay_calls.txt
+
+  undefined_funcs_auto_path: build/us/generated/undefined_funcs_auto_main.txt
+  undefined_syms_auto_path: build/us/generated/undefined_syms_auto_main.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  migrate_rodata_to_functions: True
+  create_data_pads: False
+  # the C files already exist; psyq is split under src/main/psyq/
+  create_c_files: False
+  # hand-written assembly (hasm segments) is source too: src/main/<name>.s,
+  # which splat writes only when it doesn't exist yet
+  hasm_in_src_path: True
+
+segments:
+  - name: header
+    type: header
+    start: 0x0
+
+  - name: main
+    type: code
+    start: 0x800
+    vram: 0x80010000
+    bss_size: 0x166530
+    align: 4
+    subalign: 4
+    subsegments:
+      # psylink places .rdata ahead of .text
+      - [0x800, .rodata, system/cd_file]
+      - [0x808, .rodata, ui/window]
+      - [0x828, .rodata, ui/dialog]
+      - [0x830, .rodata, system/pad]
+      - [0x84C, .rodata, gfx/prim_util]
+      - [0x860, .rodata, script/script]
+      - [0x8C0, .rodata, model/anim_control]
+      - [0x8E8, .rodata, model/model_load]
+      - [0x90C, .rodata, model/scene3d]
+      - [0x990, .rodata, model/camera]
+      - [0x9C0, .rodata, ui/text]
+      - [0xD44, .rodata, ui/str_util]
+      - [0xD78, .rodata, system/sound]
+      - [0xD98, .rodata, system/opening_movie]
+      - [0xDB8, .rodata, system/memcard]
+      - [0xF94, .rodata, card/player_rank]
+      - [0xFF0, .rodata, card/player_data]
+      - [0x1010, .rodata, model/stage]
+      - [0x1064, .rodata, system/game_flow]
+      - [0x10A4, .rodata, gfx/scroll_bg]
+      - [0x10B0, .rodata, model/effect_object]
+      - [0x149C, .rodata, duel/duel_util]
+      - [0x14A0, .rodata, duel/duel]
+      - [0x18C4, .rodata, duel/cpu_decision]
+      - [0x18E4, .rodata, duel/battle_hud]
+      - [0x19EC, .rodata, duel/card_motion]
+      - [0x1A84, .rodata, duel/hud_panels]
+      - [0x1B50, .rodata, duel/duel_session]
+      - [0x1BC0, .rodata, duel/duel_launch]
+      - [0x1C00, .rodata, card/card_render]
+      - [0x2158, .rodata, card/card_db]
+      - [0x2F70, .rodata, ui/hacking_shell]
+      - [0x3728, .rodata, system/game_exit]
+      - [0x37BC, .rodata, psyq]
+      - [0x464C, c, main]
+      - [0x4704, c, system/task]
+      # the game's own task switching and interrupt glue, written in
+      # assembly (src/main/startup.s)
+      - [0x5170, hasm, startup]
+      - [0x54F0, c, system/vblank]
+      - [0x5564, c, gfx/screen_copy]
+      - [0x5AAC, c, system/render_loop]
+      - [0x5DF4, c, system/boot]
+      - [0x5FB0, c, system/cd_file]
+      - [0x703C, c, system/frame_callback]
+      - [0x7148, c, ui/window]
+      - [0x98F4, c, ui/menu]
+      - [0xA6A4, c, ui/dialog]
+      - [0xAE00, c, system/pad]
+      - [0xB280, c, system/heap]
+      - [0xB888, c, system/angle]
+      - [0xB90C, c, system/loader]
+      - [0xBC38, c, gfx/vram_upload]
+      - [0xC10C, c, gfx/display]
+      - [0xC344, c, system/archive]
+      - [0xC438, c, system/decompress]
+      - [0xC8A8, c, system/sort]
+      - [0xCA20, c, gfx/prim]
+      - [0xCEA4, c, gfx/prim_pair]
+      - [0xDED0, c, gfx/prim3d]
+      - [0xEBC8, c, gfx/prim_util]
+      - [0xF504, c, gfx/transform]
+      - [0xF840, c, gfx/fade]
+      - [0xFBC0, c, gfx/tmd_sort]
+      - [0x11634, c, script/script]
+      - [0x12164, c, model/model_anim]
+      - [0x1344C, c, model/anim_control]
+      - [0x13C08, c, model/model_load]
+      - [0x145F0, c, model/scene3d]
+      - [0x14EE0, c, model/wire_grid]
+      - [0x15644, c, model/camera]
+      # soft-float: the arithmetic is hand-written (src/main/libmath.s), the
+      # square root at the end is C
+      - [0x1603C, hasm, libmath]
+      - [0x17584, c, libmath]
+      - [0x17690, c, ui/text]
+      - [0x1ADB4, c, ui/str_util]
+      - [0x1B5EC, c, system/sound]
+      - [0x1BBEC, c, system/opening_movie]
+      - [0x1BC98, c, system/sound_play]
+      - [0x1C358, c, system/memcard]
+      - [0x1D3A0, c, system/save_checksum]
+      - [0x1D444, c, card/player_rank]
+      - [0x1DC04, c, card/player_data]
+      - [0x1E4B0, c, model/stage]
+      - [0x1F0EC, c, system/game_flow]
+      - [0x1FF9C, c, gfx/scroll_bg]
+      - [0x20930, c, model/effect_object]
+      - [0x22170, c, model/effect_prims]
+      - [0x24508, c, duel/duel_util]
+      - [0x24A60, c, duel/duel]
+      - [0x29768, c, duel/cpu_decision]
+      - [0x2997C, c, duel/battle_hud]
+      - [0x2BA10, c, duel/card_motion]
+      - [0x2E1C0, c, duel/hud_panels]
+      - [0x2F044, c, duel/duel_session]
+      - [0x301EC, c, duel/duel_setup]
+      - [0x30864, c, duel/card_zones]
+      - [0x31ED8, c, duel/duel_launch]
+      - [0x324A8, c, card/card_render]
+      - [0x35FFC, c, card/card_db]
+      - [0x3A040, c, card/partner_level]
+      - [0x3A214, c, ui/hacking_shell]
+      - [0x3AADC, c, system/game_exit]
+      - [0x3AE10, c, psyq]
+      # the game's .data, split by the module that defines it
+      - [0x5E53C, .data, main]
+      - [0x5E54C, .data, system/vblank]
+      - [0x5E550, .data, system/cd_file]
+      - [0x5E570, .data, ui/window]
+      - [0x5E6F0, .data, system/loader]
+      - [0x5E6F4, .data, gfx/prim_util]
+      - [0x5E760, .data, gfx/tmd_sort]
+      - [0x5E780, .data, model/scene3d]
+      - [0x5E784, .data, model/wire_grid]
+      - [0x5E798, .data, ui/text]
+      - [0x5E7FC, .data, system/sound]
+      - [0x5E850, .data, system/memcard]
+      - [0x5E8C0, .data, model/stage]
+      - [0x5EA80, .data, gfx/scroll_bg]
+      - [0x5EA94, .data, card/card_render]
+      - [0x5ED0C, .data, card/card_db]
+      - [0x5F704, .data, ui/hacking_shell]
+      - [0x5F714, data, psyq]
+      - { start: 0x68208, type: bss, vram: 0x80077A08, name: game }
+      - { start: 0x68208, type: bss, vram: 0x801D83D8, name: psyq }
+
+  - [0x68208]

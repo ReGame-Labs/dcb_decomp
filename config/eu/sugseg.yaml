@@ -1,0 +1,86 @@
+# Digimon Digital Card Battle, Europe (SLES-03900): SUGSEG
+name: sugseg
+sha1: 2acaeb51805531e9664f25c61d56e0cf61024c80
+options:
+  basename: sugseg
+  # extracted from disks/eu/P.DRV by tools/extract_drv.py
+  target_path: build/eu/disks/SUGSEG.BIN
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/eu/sugseg
+  src_path: src/sugseg
+  build_path: build/eu
+
+  ld_script_path: build/eu/generated/sugseg.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  gp_value: 0x8007A224
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  # the executable's symbols, which the overlay calls and reads
+  symbol_addrs_path:
+    - config/eu/symbols.txt
+    # and its own
+    - config/eu/symbols_sugseg.txt
+  undefined_funcs_auto_path: build/eu/generated/undefined_funcs_auto_sugseg.txt
+  undefined_syms_auto_path: build/eu/generated/undefined_syms_auto_sugseg.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  migrate_rodata_to_functions: True
+  create_data_pads: False
+  # the C files in src/sugseg/ exist; mk/version/eu.mk lists those eu builds
+  create_c_files: False
+
+segments:
+  # loaded at OVERLAY_LOAD_ADDR, the end of the executable's .bss
+  - name: sugseg
+    type: code
+    start: 0x0
+    vram: 0x801E0890
+    align: 4
+    subalign: 4
+    subsegments:
+      # us's modules, each with its rodata and data (tools/split_version.py)
+      - [0x0, .rodata, effect/sug_history]
+      - [0x4, .rodata, effect/sug_gradient]
+      - [0x18, .rodata, effect/sug_tex_anim]
+      - [0x5C, .rodata, effect/sug_effect_script]
+      - [0x164, .rodata, battle/sug_sprite]
+      - [0x188, c, effect/sug_history]
+      - [0x770, c, effect/sug_sphere]
+      - [0x3E8C, c, effect/sug_gradient]
+      - [0x5614, c, effect/sug_model_effect]
+      - [0x5D2C, c, effect/sug_stage_fade]
+      - [0x6138, c, effect/sug_sprite_effect]
+      - [0x6358, c, effect/sug_trail]
+      - [0x82C8, c, effect/sug_fade_rect]
+      - [0x8584, c, effect/sug_scroll_texture]
+      - [0x8BA0, c, effect/sug_tex_anim]
+      - [0x96A4, c, effect/sug_light_motion]
+      - [0x9B18, c, effect/sug_effect_script]
+      - [0xC3C8, c, effect/sug_screen_copy]
+      - [0xD17C, c, battle/sug_sprite]
+      - [0xDC88, c, battle/sug_camera]
+      - [0xDDAC, c, battle/sug_hud]
+      - [0xF9F0, c, battle/sug_battle]
+      - [0x10FE0, c, sug_bss]
+      - [0x10FE0, .data, effect/sug_light_motion]
+      - [0x11020, .data, battle/sug_battle]
+      - [0x11024, .data, effect/sug_screen_copy]
+      - [0x11028, .data, effect/sug_effect_script]
+      - [0x11100, .data, sug_bss]
+
+  - [0x11730]

@@ -1,0 +1,186 @@
+# Digimon Digital Card Battle, Europe (SLES-03900): the executable
+name: main
+sha1: 050ae623135d5c233c255c9e76956eaeabd2fa6e
+options:
+  basename: main
+  target_path: disks/eu/SLES_039.00
+  base_path: ../..
+  platform: psx
+  compiler: GCC
+
+  asm_path: asm/eu/main
+  asset_path: asm/eu/main/bin
+  src_path: src/main
+  build_path: build/eu
+
+  ld_script_path: build/eu/generated/main.ld
+
+  global_vram_start: 0x80000000
+  global_vram_end: 0x80200000
+
+  # what the startup code (__SN_ENTRY_POINT) sets $gp to, 4 bytes before
+  # the start of .bss
+  gp_value: 0x8007A224
+
+  generate_asm_macros_files: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  symbol_addrs_path:
+    - config/eu/symbols.txt
+    - config/eu/symbols_overlay_calls.txt
+  undefined_funcs_auto_path: build/eu/generated/undefined_funcs_auto_main.txt
+  undefined_syms_auto_path: build/eu/generated/undefined_syms_auto_main.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  ld_bss_is_noload: True
+
+  migrate_rodata_to_functions: True
+  create_data_pads: False
+  # the C files in src/main/ exist; mk/version/eu.mk lists those eu builds
+  create_c_files: False
+
+segments:
+  - name: header
+    type: header
+    start: 0x0
+
+  - name: main
+    type: code
+    start: 0x800
+    vram: 0x80010000
+    # the startup code clears .bss up to 0x801E0890, OVERLAY_LOAD_ADDR
+    bss_size: 0x166668
+    align: 4
+    subalign: 4
+    subsegments:
+      # us's modules, each with its rodata and data (tools/split_version.py)
+      - [0x800, .rodata, system/cd_file]
+      - [0x808, .rodata, ui/window]
+      - [0x828, .rodata, ui/dialog]
+      - [0x830, .rodata, system/pad]
+      - [0x84C, .rodata, system/loader]
+      - [0x86C, .rodata, gfx/prim_util]
+      - [0x880, .rodata, script/script]
+      - [0x8E0, .rodata, model/anim_control]
+      - [0x908, .rodata, model/model_load]
+      - [0x930, .rodata, model/scene3d]
+      - [0x9B4, .rodata, model/camera]
+      - [0x9E4, .rodata, ui/text]
+      - [0xD68, .rodata, ui/str_util]
+      - [0xD9C, .rodata, system/sound]
+      - [0xDBC, .rodata, system/opening_movie]
+      - [0xDDC, .rodata, system/memcard]
+      - [0xFB8, .rodata, card/player_rank]
+      - [0x1014, .rodata, card/player_data]
+      - [0x1034, .rodata, model/stage]
+      - [0x1088, .rodata, system/game_flow]
+      - [0x10C8, .rodata, gfx/scroll_bg]
+      - [0x10D4, .rodata, model/effect_object]
+      - [0x14C0, .rodata, duel/duel_util]
+      - [0x14C4, .rodata, duel/duel]
+      - [0x18E8, .rodata, duel/cpu_decision]
+      - [0x1908, .rodata, duel/battle_hud]
+      - [0x1A10, .rodata, duel/card_motion]
+      - [0x1AA8, .rodata, duel/hud_panels]
+      - [0x1B74, .rodata, duel/duel_session]
+      - [0x1BE4, .rodata, duel/duel_launch]
+      - [0x1C24, .rodata, card/card_render]
+      - [0x217C, .rodata, card/card_db]
+      - [0x2F94, .rodata, ui/hacking_shell]
+      - [0x374C, .rodata, system/game_exit]
+      - [0x37E0, rodata, psyq]
+      - [0x4800, c, main]
+      - [0x48C0, c, system/task]
+      - [0x5344, asm, startup]
+      - [0x56C4, c, system/vblank]
+      - [0x5738, c, gfx/screen_copy]
+      - [0x5BEC, c, system/render_loop]
+      - [0x5F2C, c, system/boot]
+      - [0x60E8, c, system/cd_file]
+      - [0x7174, c, system/frame_callback]
+      - [0x728C, c, ui/window]
+      - [0x9910, c, ui/menu]
+      - [0xA654, c, ui/dialog]
+      - [0xAE00, c, system/pad]
+      - [0xB284, c, system/heap]
+      - [0xB82C, c, system/angle]
+      - [0xB8A4, c, system/loader]
+      - [0xBBCC, c, gfx/vram_upload]
+      - [0xC0C0, c, gfx/display]
+      - [0xC2F4, c, system/archive]
+      - [0xC3E8, c, system/decompress]
+      - [0xC854, c, system/sort]
+      - [0xC9CC, c, gfx/prim]
+      - [0xCE5C, c, gfx/prim_pair]
+      - [0xDE30, c, gfx/prim3d]
+      - [0xEA20, c, gfx/prim_util]
+      - [0xF384, c, gfx/transform]
+      - [0xF6D0, c, gfx/fade]
+      - [0xF994, c, gfx/tmd_sort]
+      - [0x11354, c, script/script]
+      - [0x11E0C, c, model/model_anim]
+      - [0x13018, c, model/anim_control]
+      - [0x137A8, c, model/model_load]
+      - [0x14174, c, model/scene3d]
+      - [0x14980, c, model/wire_grid]
+      - [0x150D0, c, model/camera]
+      - [0x15A50, asm, libmath]
+      - [0x170A4, c, ui/text]
+      - [0x1A8A4, c, ui/str_util]
+      - [0x1B0E0, c, system/sound]
+      - [0x1B6E8, c, system/opening_movie]
+      - [0x1B794, c, system/sound_play]
+      - [0x1BE14, c, system/memcard]
+      - [0x1CE40, c, system/save_checksum]
+      - [0x1CEDC, c, card/player_rank]
+      - [0x1D690, c, card/player_data]
+      - [0x1DEE4, c, model/stage]
+      - [0x1EAF8, c, system/game_flow]
+      - [0x1F990, c, gfx/scroll_bg]
+      - [0x20218, c, model/effect_object]
+      - [0x21A8C, c, model/effect_prims]
+      - [0x23D04, c, duel/duel_util]
+      - [0x24258, c, duel/duel]
+      - [0x28924, c, duel/cpu_decision]
+      - [0x28B20, c, duel/battle_hud]
+      - [0x2AB9C, c, duel/card_motion]
+      - [0x2D970, c, duel/hud_panels]
+      - [0x2E784, c, duel/duel_session]
+      - [0x2F88C, c, duel/duel_setup]
+      - [0x2FED8, c, duel/card_zones]
+      - [0x3145C, c, duel/duel_launch]
+      - [0x31A2C, c, card/card_render]
+      - [0x35500, c, card/card_db]
+      - [0x39190, c, card/partner_level]
+      - [0x39364, c, ui/hacking_shell]
+      - [0x39C5C, c, system/game_exit]
+      - [0x39F90, asm, psyq]
+      - [0x60DA0, .data, main]
+      - [0x60DA8, .data, system/vblank]
+      - [0x60DAC, .data, system/cd_file]
+      - [0x60DCC, .data, ui/window]
+      - [0x60F4C, .data, system/loader]
+      - [0x60F50, .data, gfx/prim_util]
+      - [0x60FBC, .data, gfx/tmd_sort]
+      - [0x60FDC, .data, model/scene3d]
+      - [0x60FE0, .data, model/wire_grid]
+      - [0x60FF4, .data, ui/text]
+      - [0x61058, .data, system/sound]
+      - [0x610AC, .data, system/memcard]
+      - [0x6111C, .data, model/stage]
+      - [0x612DC, .data, gfx/scroll_bg]
+      - [0x612F0, .data, card/card_render]
+      - [0x61568, .data, card/card_db]
+      - [0x61F60, .data, ui/hacking_shell]
+      - [0x61F70, data, psyq]
+      - { start: 0x6AA28, type: bss, vram: 0x8007A228, name: game }
+      # PsyQ's .bss starts with libspu's; the game's common symbols that come
+      # after it stay there, as in us
+      - { start: 0x6AA28, type: bss, vram: 0x801DABF8, name: psyq }
+
+  - [0x6B000]
