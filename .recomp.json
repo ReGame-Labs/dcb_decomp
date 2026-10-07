@@ -1,0 +1,42 @@
+{
+  "$schema": "https://recomp.fyi/schema/v1.json",
+  "game": "Digimon Digital Card Battle",
+  "wikidata": "Q3027783",
+  "system": "PS1",
+  "type": "decomp",
+  "original": [
+    {
+      "region": "USA",
+      "serial": "SLUS-01328",
+      "sha1": "fa4e03b5e0671dce399a35f2747080ced492d2c3"
+    },
+    {
+      "region": "Japan",
+      "serial": "SLPS-02506",
+      "sha1": "447c5256757685728bfbecaf3b3b2e7c0164b6cc"
+    },
+    {
+      "region": "Europe",
+      "serial": "SLES-03900",
+      "sha1": "050ae623135d5c233c255c9e76956eaeabd2fa6e"
+    }
+  ],
+  "project": "Digimon Digital Card Battle decompilation",
+  "status": "complete",
+  "targets": ["PS1"],
+  "toolchain": "Splat",
+  "approach": "Matching decompilation with GCC 2.95.2 (USA) and GCC 2.8.1 (Japan, Europe), splat and maspsx, byte-identical for all three releases from one source tree",
+  "maintainers": [
+    { "name": "ReGame-Labs", "link": "https://github.com/ReGame-Labs" }
+  ],
+  "links": [
+    { "label": "decomp.dev", "url": "https://decomp.dev/ReGame-Labs/dcb_decomp" }
+  ],
+  "help": [
+    "Naming functions, data and struct fields",
+    "Replacing the last fake matches with natural C",
+    "Readability of the matched C"
+  ],
+  "tags": ["matching", "gcc", "maspsx", "psyq"],
+  "notes": "Every game function is C in all three releases, the executable and the overlays: 1,370 functions in the USA one, 1,191 in the Japanese one and 1,598 in the European one. The game's data is C too, and each release rebuilds byte for byte, checked against the SHA-1 of every original binary. The PsyQ libraries are Sony's code, not the game's, and are left out of the progress. Readability work continues: names, comments and cleaner C. 7 functions still match through a fake match, each marked in the source and listed in TODO.md."
+}
